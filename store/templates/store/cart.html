@@ -25,4 +25,10 @@
 </div>
 
 <h2 class="total text-info">Totale: $0</h1>
+
+<div class="cart-buttons">
+  <a href="{% url 'checkout' %}" class="btn btn-success">Procedi al checkout</a>
+  <a href="{% url 'store' %}" class="continue-link">Continua lo shopping</a>
+</div>
+
 {% endblock content %}
