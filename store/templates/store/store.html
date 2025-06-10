@@ -1,229 +1,326 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
-<h1>store</h1>
+<h1 class="store-title text-info">I nostri prodotti!</h1>
 <div class="container">
   <div class="row row-cols-3 row-cols-md-5 g-4">
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Gatto"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Gatto" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Gatto</div>
       <div class="price text-center">€12.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Cane"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Cane" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Cane</div>
       <div class="price text-center">€14.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Coniglio"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Coniglio"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Coniglio</div>
       <div class="price text-center">€11.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Riccio"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Riccio"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Riccio</div>
       <div class="price text-center">€13.00</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Criceto"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Criceto"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Criceto</div>
       <div class="price text-center">€9.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Panda"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Panda" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Panda</div>
       <div class="price text-center">€19.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Koala"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Koala" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Koala</div>
       <div class="price text-center">€17.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Volpe"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Volpe" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Volpe</div>
       <div class="price text-center">€15.00</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Cervo"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Cervo" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Cervo</div>
       <div class="price text-center">€16.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Pinguino"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Pinguino"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Pinguino</div>
       <div class="price text-center">€18.00</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Lontra"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Lontra"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Lontra</div>
       <div class="price text-center">€13.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Furetto"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Furetto"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Furetto</div>
       <div class="price text-center">€12.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Scoiattolo"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Scoiattolo"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Scoiattolo</div>
       <div class="price text-center">€10.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Lemure"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Lemure"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Lemure</div>
       <div class="price text-center">€14.00</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Cincillà"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Cincillà"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Cincillà</div>
       <div class="price text-center">€13.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Cerbiatto"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Cerbiatto"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Cerbiatto</div>
       <div class="price text-center">€15.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Pulcino"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Pulcino"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Pulcino</div>
       <div class="price text-center">€8.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Cavalluccio Marino"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Cavalluccio Marino"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Cavalluccio Marino</div>
       <div class="price text-center">€11.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Gufo"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img src="https://placehold.co/220x220" class="img-fluid" alt="Gufo" />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Gufo</div>
       <div class="price text-center">€10.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Fenicottero"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Fenicottero"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Fenicottero</div>
       <div class="price text-center">€16.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Tartaruga"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Tartaruga"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Tartaruga</div>
       <div class="price text-center">€12.00</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Coccinella"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Coccinella"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Coccinella</div>
       <div class="price text-center">€7.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Pappagallo"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Pappagallo"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Pappagallo</div>
       <div class="price text-center">€15.50</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Labrador"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Labrador"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Labrador</div>
       <div class="price text-center">€18.99</div>
     </div>
     <div class="col d-flex flex-column align-items-center">
-      <img
-        src="https://placehold.co/220x220"
-        class="img-fluid mb-2"
-        alt="Orsetto"
-      />
+      <div class="position-relative product-image-container mb-2">
+        <img
+          src="https://placehold.co/220x220"
+          class="img-fluid"
+          alt="Orsetto"
+        />
+        <button class="btn btn-sm btn-primary add-to-cart-btn">
+          Aggiungi al carrello
+        </button>
+      </div>
       <div class="w-100 text-center">Orsetto</div>
       <div class="price text-center">€13.99</div>
     </div>
