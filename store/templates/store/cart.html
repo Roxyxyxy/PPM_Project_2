@@ -1,5 +1,28 @@
-{% extends 'store/main.html' %}
-{% load static %}
-{% block content %}
-<h1>cart</h1>
+{% extends 'store/main.html' %} {% load static %} {% block content %}
+<p class="homecart">
+  <a href="{% url 'store' %}">Home</a> &gt; <a href="{% url 'cart' %}">Cart</a>
+</p>
+
+<h1 class="text-info">Carrello</h1>
+
+<div class="cart-grid">
+  <div class="cart-header-1">Articolo</div>
+  <div class="cart-header">Prezzo</div>
+  <div class="cart-header">Quantità</div>
+  <div class="cart-header">Totale</div>
+
+  <div class="cart-cell-1">
+    <img src="https://placehold.co/160x160" alt="Articolo" class="cart-img" />
+    <div class="cart-title">Articolo 1</div>
+  </div>
+  <div class="cart-cell">$20</div>
+  <div class="cart-cell">
+    <i class="bi bi-dash"></i>
+    0
+    <i class="bi bi-plus"></i>
+  </div>
+  <div class="cart-cell">$0</div>
+</div>
+
+<h2 class="total text-info">Totale: $0</h1>
 {% endblock content %}
