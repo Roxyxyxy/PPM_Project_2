@@ -83,5 +83,8 @@
     {% block javascript %}
     <!-- JavaScript specifico della pagina può essere inserito qui -->
     {% endblock javascript %}
+    <script type="text/javascript">
+      var user = "{{request.user}}";
+    </script>
   </body>
 </html>
