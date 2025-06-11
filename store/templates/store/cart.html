@@ -11,24 +11,34 @@
   <div class="cart-header">Quantità</div>
   <div class="cart-header">Totale</div>
 
+  {% for item in items %}
   <div class="cart-cell-1">
-    <img src="https://placehold.co/160x160" alt="Articolo" class="cart-img" />
-    <div class="cart-title">Articolo 1</div>
+    <img
+      src="{{ item.product.imageURL }}"
+      alt="{{ item.product.name }}"
+      class="cart-img"
+    />
+    <div class="cart-title">{{ item.product.name }}</div>
   </div>
-  <div class="cart-cell">$20</div>
+  <div class="cart-cell">€{{ item.product.price|floatformat:2 }}</div>
   <div class="cart-cell">
     <i class="bi bi-dash"></i>
-    0
+    {{ item.quantity }}
     <i class="bi bi-plus"></i>
   </div>
-  <div class="cart-cell">$0</div>
+  <div class="cart-cell">€{{ item.get_total|floatformat:2 }}</div>
+  {% empty %}
+  <div class="cart-cell-1" colspan="4">Il carrello è vuoto.</div>
+  {% endfor %}
 </div>
 
-<h2 class="total text-info">Totale: $0</h1>
+
+<h2 class="total text-info">
+  Totale: €{{ order.get_cart_total|floatformat:2 }}
+</h2>
 
 <div class="cart-buttons">
   <a href="{% url 'checkout' %}" class="btn btn-success">Procedi al checkout</a>
   <a href="{% url 'store' %}" class="continue-link">Continua lo shopping</a>
 </div>
-
 {% endblock content %}

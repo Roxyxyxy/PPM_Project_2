@@ -1,6 +1,5 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
 
-
 <div class="checkout-container">
   <div class="checkout-form">
     <form>
@@ -66,7 +65,7 @@
         />
       </div>
       <hr />
-      <input class="btn btn-success" type="submit" value="Continua" />
+      <input class="btn btn-primary btn-lg" type="submit" value="Continua" />
     </form>
   </div>
   <div class="checkout-summary">
@@ -74,17 +73,29 @@
       >&#x2190; Torna al carrello</a
     >
     <hr />
-    <h3>Riepilogo ordine</h3>
-    <div class="cart-row">
-      <div>
-        <img class="cart-img" src="https://placehold.co/80x80" />
+    <h3 class="text-info">Riepilogo ordine</h3>
+    <hr />
+    {% for item in items %}
+    <div class="cart-row order-summary-row">
+      <div style="flex: 2">
+        <img
+          class="cart-img"
+          src="{{ item.product.imageURL }}"
+          style="
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+          "
+        />
       </div>
-      <div>Articolo 1</div>
-      <div>$20.00</div>
-      <div>x2</div>
+      <div style="flex: 2"><p>{{ item.product.name }}</p></div>
+      <div style="flex: 1"><p>€{{ item.product.price|floatformat:2 }}</p></div>
+      <div style="flex: 1"><p>x{{ item.quantity }}</p></div>
     </div>
-    <div class="total">Totale articoli: 2</div>
-    <div class="total">Totale: $40</div>
+    {% endfor %}
+    <div class="total">Totale articoli: {{ order.get_cart_items }}</div>
+    <div class="total">Totale: €{{ order.get_cart_total|floatformat:2 }}</div>
   </div>
 </div>
 {% endblock content %}

@@ -251,3 +251,11 @@ body{
   color: rgb(13, 202, 240);
   margin-top: 8px;
 }
+
+.order-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
