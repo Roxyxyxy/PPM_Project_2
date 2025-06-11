@@ -1,6 +1,90 @@
-{% extends 'store/main.html' %}
-{% load static %}
-{% block content %}
-<h1>checkout</h1>
+{% extends 'store/main.html' %} {% load static %} {% block content %}
 
+
+<div class="checkout-container">
+  <div class="checkout-form">
+    <form>
+      <div class="form-field">
+        <h1 class="text-info">Checkout</h1>
+        <input
+          required
+          class="form-control"
+          type="text"
+          name="name"
+          placeholder="Nome"
+        />
+      </div>
+      <div class="form-field">
+        <input
+          required
+          class="form-control"
+          type="email"
+          name="email"
+          placeholder="Email"
+        />
+      </div>
+      <hr />
+      <p class="section-title">Indirizzo di spedizione</p>
+      <div class="form-field">
+        <input
+          class="form-control"
+          type="text"
+          name="address"
+          placeholder="Indirizzo"
+        />
+      </div>
+      <div class="form-field">
+        <input
+          class="form-control"
+          type="text"
+          name="city"
+          placeholder="Città"
+        />
+      </div>
+      <div class="form-field">
+        <input
+          class="form-control"
+          type="text"
+          name="state"
+          placeholder="Provincia"
+        />
+      </div>
+      <div class="form-field">
+        <input
+          class="form-control"
+          type="text"
+          name="zipcode"
+          placeholder="CAP"
+        />
+      </div>
+      <div class="form-field">
+        <input
+          class="form-control"
+          type="text"
+          name="country"
+          placeholder="Nazione"
+        />
+      </div>
+      <hr />
+      <input class="btn btn-success" type="submit" value="Continua" />
+    </form>
+  </div>
+  <div class="checkout-summary">
+    <a class="continue-link" href="{% url 'cart' %}"
+      >&#x2190; Torna al carrello</a
+    >
+    <hr />
+    <h3>Riepilogo ordine</h3>
+    <div class="cart-row">
+      <div>
+        <img class="cart-img" src="https://placehold.co/80x80" />
+      </div>
+      <div>Articolo 1</div>
+      <div>$20.00</div>
+      <div>x2</div>
+    </div>
+    <div class="total">Totale articoli: 2</div>
+    <div class="total">Totale: $40</div>
+  </div>
+</div>
 {% endblock content %}
