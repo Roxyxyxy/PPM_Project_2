@@ -71,6 +71,13 @@ body{
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+.product-img-fixed {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .product-image-container:hover .add-to-cart-btn {
   display: block;
 }
