@@ -101,7 +101,6 @@ body{
   grid-template-rows: auto auto;
   margin: 30px 0;
   align-items: center;
-  border-bottom: 1px solid #eee;
   border-top: 1px solid #eee;
   color:rgb(13, 202, 240);
 }
@@ -124,10 +123,16 @@ body{
   text-align: left;
   align-items: center;
   padding: 10px 0;
+  border-bottom: 1px solid #eee;
 }
 .cart-cell {
   text-align: center;
+  justify-content: center;
+  display: flex;
+  align-items: center;
   padding: 10px 0;
+  height: 100px;
+  border-bottom: 1px solid #eee;
 }
 .cart-img {
   width: 80px;
@@ -257,10 +262,11 @@ body{
   margin-top: 8px;
 }
 
-.order-summary-row {
+.cart-row.order-summary-row {
   display: flex;
+  margin: 0;
   align-items: center;
   gap: 0;
-  border-bottom: 1px solid #eee;
+  border-top: 0;
   padding: 12px 0;
 }
