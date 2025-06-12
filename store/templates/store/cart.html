@@ -22,9 +22,17 @@
   </div>
   <div class="cart-cell">€{{ item.product.price|floatformat:2 }}</div>
   <div class="cart-cell">
-    <i class="bi bi-dash"></i>
+    <i
+      class="bi bi-dash chg-quantity update-cart"
+      data-product="{{ item.product.id }}"
+      data-action="remove"
+    ></i>
     {{ item.quantity }}
-    <i class="bi bi-plus"></i>
+    <i
+      class="bi bi-plus chg-quantity update-cart"
+      data-product="{{ item.product.id }}"
+      data-action="add"
+    ></i>
   </div>
   <div class="cart-cell">€{{ item.get_total|floatformat:2 }}</div>
   {% empty %}
