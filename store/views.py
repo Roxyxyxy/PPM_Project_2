@@ -25,7 +25,28 @@ def login_view(request):
             messages.error(request, "Username o password non validi.")
     else:
         form = AuthenticationForm()
-    return render(request, 'registration/login.html', {'form': form})
+    
+    # Calcola cartItems come nelle altre viste
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+    else:
+        try:
+            cart = json.loads(request.COOKIES.get('cart', '{}'))
+        except:
+            cart = {}
+        cartItems = 0
+        for i in cart:
+            try:
+                cartItems += cart[i]['quantity']
+            except:
+                pass
+    
+    return render(request, 'registration/login.html', {
+        'form': form, 
+        'cartItems': cartItems
+    })
 
 def register_view(request):
     if request.method == 'POST':

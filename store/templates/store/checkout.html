@@ -1,7 +1,7 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
 
 <div class="checkout-container">
-  <!-- Aggiunti gli ID necessari ai contenitori esistenti -->
+  <!-- Form wrapper con ID -->
   <div id="form-wrapper" class="checkout-form">
     <form id="form">
       {% csrf_token %}
@@ -66,11 +66,11 @@
         <hr />
       </div>
 
-      <button id="form-button" type="submit">Continua</button>
+      <!-- Pulsante unico per entrambe le funzioni -->
+      <button id="payment-button" class="btn btn-info text-white" type="button">
+        Effettua Pagamento
+      </button>
     </form>
-  </div>
-  <div id="payment-info" class="hidden">
-    <button id="make-payment">Effettua Pagamento</button>
   </div>
 
   <div class="checkout-summary">
@@ -107,6 +107,8 @@
 <script type="text/javascript">
   var shipping = "{{order.shipping}}";
   var total = "{{order.get_cart_total|floatformat:2}}";
+  var form = document.getElementById("form");
+  var paymentButton = document.getElementById("payment-button");
 
   if (shipping == "False") {
     document.getElementById("shipping-info").innerHTML = "";
@@ -116,30 +118,52 @@
     document.getElementById("user-info").innerHTML = "";
   }
 
-  if (shipping == "False" && user != "AnonymousUser") {
-    //Hide entire form if user is logged in and shipping is false
-    document.getElementById("form-wrapper").classList.add("hidden");
-    //Show payment if logged in user wants to buy an item that does not require shipping
-    document.getElementById("payment-info").classList.remove("hidden");
-  }
-
-  var form = document.getElementById("form");
-  form.addEventListener("submit", function (e) {
+  // Gestisce il click sul pulsante di pagamento
+  paymentButton.addEventListener("click", function (e) {
     e.preventDefault();
-    console.log("Form Submitted...");
-    document.getElementById("form-button").classList.add("hidden");
-    document.getElementById("payment-info").classList.remove("hidden");
-  });
-
-  document
-    .getElementById("make-payment")
-    .addEventListener("click", function (e) {
-      submitFormData();
-    });
-
-  function submitFormData() {
     console.log("Payment button clicked");
 
+    // Verifica se il form è valido
+    var isFormValid = true;
+
+    if (user == "AnonymousUser") {
+      // Verifica i campi obbligatori per utenti anonimi
+      var nameField = form.querySelector('input[name="name"]');
+      var emailField = form.querySelector('input[name="email"]');
+
+      if (!nameField.value || !emailField.value) {
+        isFormValid = false;
+        alert("Per favore completa tutti i campi obbligatori");
+        return;
+      }
+    }
+
+    if (shipping != "False") {
+      // Verifica campi di spedizione
+      var addressField = form.querySelector('input[name="address"]');
+      var cityField = form.querySelector('input[name="city"]');
+      var stateField = form.querySelector('input[name="state"]');
+      var zipcodeField = form.querySelector('input[name="zipcode"]');
+
+      if (
+        !addressField.value ||
+        !cityField.value ||
+        !stateField.value ||
+        !zipcodeField.value
+      ) {
+        isFormValid = false;
+        alert("Per favore completa tutti i campi dell'indirizzo");
+        return;
+      }
+    }
+
+    // Se tutto è valido, invia l'ordine
+    if (isFormValid) {
+      submitFormData();
+    }
+  });
+
+  function submitFormData() {
     var userFormData = {
       name: null,
       email: null,
