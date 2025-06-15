@@ -98,4 +98,13 @@
     <div class="total">Totale: €{{ order.get_cart_total|floatformat:2 }}</div>
   </div>
 </div>
+
+<script type="text/javascript">
+	var shipping = '{{order.shipping}}'
+
+	if (shipping == 'False'){
+	 	document.getElementById('shipping-info').innerHTML = ''
+	}
+</script>
+
 {% endblock content %}
