@@ -94,9 +94,20 @@
 
         <!-- Icone a destra (log-in e carrello) -->
         <div class="d-flex ms-auto">
-          <a href="#" class="text-white mx-2">
+          <a href="{% url 'login' %}" class="text-white mx-2" title="Account">
             <i class="bi bi-person text-info"></i>
           </a>
+
+          {% if user.is_superuser %}
+          <a
+            href="{% url 'management:dashboard' %}"
+            class="text-white mx-2"
+            title="Dashboard"
+          >
+            <i class="bi bi-speedometer2 text-info"></i>
+          </a>
+          {% endif %}
+
           <a href="{% url 'cart' %}" class="text-white mx-2 position-relative">
             <i class="bi bi-cart2 text-info"></i>
             <span
@@ -127,26 +138,7 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Variabili globali per JS -->
-    <script type="text/javascript">
-      var user = "{{ request.user }}";
-    </script>
-
+    <!-- Cart JS -->
     <script src="{% static 'js/cart.js' %}"></script>
-
-    <script type="text/javascript">
-      function getCSRFTokenValue() {
-        let cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          let cookie = cookies[i].trim();
-          if (cookie.startsWith("csrftoken=")) {
-            return decodeURIComponent(cookie.substring("csrftoken=".length));
-          }
-        }
-        return null;
-      }
-      var csrftoken = getCSRFTokenValue();
-      // console.log("CSRF Token from main.html:", csrftoken); // For debugging
-    </script>
   </body>
 </html>

@@ -1,0 +1,30 @@
+{% extends 'store/main.html' %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h4>Login</h4>
+        </div>
+        <div class="card-body">
+          {% if user.is_authenticated %}
+          <p>Sei connesso come <strong>{{ user.username }}</strong></p>
+          <a href="{% url 'logout' %}" class="btn btn-info text-white"
+            >Logout</a
+          >
+          {% else %}
+          <form method="POST">
+            {% csrf_token %} {{ form.as_p }}
+            <button type="submit" class="btn btn-info text-white">Login</button>
+          </form>
+
+          <p class="mt-3">
+            Non hai un account? <a href="{% url 'register' %}">Registrati</a>
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -20,6 +20,9 @@
         <div class="card-body">
           <h5 class="card-title">{{ total_orders }}</h5>
           <p class="card-text">Totale ordini effettuati</p>
+          <a href="{% url 'management:order_list' %}" class="btn btn-light"
+            >Gestisci</a
+          >
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@ def is_manager(user):
     return user.groups.filter(name='Store Managers').exists() or user.is_superuser
 
 @login_required
-@user_passes_test(is_manager)
+@user_passes_test(lambda u: u.is_superuser)
 def dashboard(request):
     total_products = Product.objects.count()
     total_orders = Order.objects.count()
@@ -77,13 +77,13 @@ def edit_product(request, pk):
 @login_required
 @user_passes_test(is_manager)
 def delete_product(request, pk):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, pk=pk)
-        product_name = product.name
-        
-        # Puoi aggiungere qui la logica per eliminare l'immagine
-        
-        product.delete()
-        messages.success(request, f'Prodotto "{product_name}" eliminato con successo!')
+    product = get_object_or_404(Product, pk=pk)
     
-    return redirect('management:product_list')
+    if request.method == 'POST':
+        product.delete()
+        messages.success(request, 'Prodotto eliminato con successo!')
+        return redirect('management:product_list')
+    
+    return render(request, 'management/product_confirm_delete.html', {
+        'product': product
+    })
