@@ -8,6 +8,25 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 import json
 import datetime
 
+# Login view
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('store')
+            else:
+                messages.error(request, "Username o password non validi.")
+        else:
+            messages.error(request, "Username o password non validi.")
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -205,4 +224,8 @@ def processOrder(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    response = redirect('login')
+    # Opzionale: Eliminare il cookie del carrello
+    if 'cart' in request.COOKIES:
+        response.delete_cookie('cart')
+    return response
