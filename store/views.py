@@ -5,21 +5,29 @@ import datetime
 from .models import * 
 
 def store(request):
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+    else:
+        # Create empty cart for now for non-logged in user
+        try:
+            cart = json.loads(request.COOKIES['cart'])
+        except:
+            cart = {}
+            
+        items = []
+        order = {'get_cart_total':0, 'get_cart_items':0, 'shipping':False}
+        cartItems = order['get_cart_items']
+        
+        # Add this code to count cart items from cookie - same as in cart view
+        for i in cart:
+            cartItems += cart[i]['quantity']
 
-	if request.user.is_authenticated:
-		customer = request.user.customer
-		order, created = Order.objects.get_or_create(customer=customer, complete=False)
-		items = order.orderitem_set.all()
-		cartItems = order.get_cart_items
-	else:
-		#Create empty cart for now for non-logged in user
-		items = []
-		order = {'get_cart_total':0, 'get_cart_items':0, 'shipping':False}
-		cartItems = order['get_cart_items']
-
-	products = Product.objects.all()
-	context = {'products':products, 'cartItems':cartItems}
-	return render(request, 'store/store.html', context)
+    products = Product.objects.all()
+    context = {'products':products, 'cartItems':cartItems}
+    return render(request, 'store/store.html', context)
 
 def cart(request):
 
@@ -65,19 +73,46 @@ def cart(request):
 	return render(request, 'store/cart.html', context)
 
 def checkout(request):
-	if request.user.is_authenticated:
-		customer = request.user.customer
-		order, created = Order.objects.get_or_create(customer=customer, complete=False)
-		items = order.orderitem_set.all()
-		cartItems = order.get_cart_items
-	else:
-		#Create empty cart for now for non-logged in user
-		items = []
-		order = {'get_cart_total':0, 'get_cart_items':0, 'shipping':False}
-		cartItems = order['get_cart_items']
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+    else:
+        # Create empty cart for now for non-logged in user
+        try:
+            cart = json.loads(request.COOKIES['cart'])
+        except:
+            cart = {}
+            
+        items = []
+        order = {'get_cart_total':0, 'get_cart_items':0, 'shipping':False}
+        cartItems = order['get_cart_items']
+        
+        # Add this code to count cart items from cookie - same as in cart view
+        for i in cart:
+            cartItems += cart[i]['quantity']
+            
+            # Optionally process items for checkout view too
+            product = Product.objects.get(id=i)
+            total = (product.price * cart[i]['quantity'])
 
-	context = {'items':items, 'order':order, 'cartItems':cartItems}
-	return render(request, 'store/checkout.html', context)
+            order['get_cart_total'] += total
+            order['get_cart_items'] += cart[i]['quantity']
+
+            item = {
+                'id':product.id,
+                'product':{'id':product.id,'name':product.name, 'price':product.price, 
+                'imageURL':product.imageURL}, 'quantity':cart[i]['quantity'],
+                'digital':product.digital,'get_total':total,
+            }
+            items.append(item)
+
+            if product.digital == False:
+                order['shipping'] = True
+
+    context = {'items':items, 'order':order, 'cartItems':cartItems}
+    return render(request, 'store/checkout.html', context)
 
 def updateItem(request):
 	data = json.loads(request.body)
