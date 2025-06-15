@@ -1,5 +1,25 @@
-{% extends 'store/main.html' %}
-{% block content %}
+{% extends 'store/main.html' %} {% block content %}
+<style>
+  .helptext {
+    display: none !important;
+  }
+  form ul {
+    display: none !important;
+  }
+  ul.errorlist + p {
+    display: none !important;
+  }
+  #id_password1 + span,
+  #id_password2 + span,
+  #id_password1 + small,
+  #id_password2 + small {
+    display: none !important;
+  }
+  form p {
+    margin-bottom: 15px;
+  }
+</style>
+
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-6">
@@ -9,12 +29,15 @@
         </div>
         <div class="card-body">
           <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-info text-white">Registrati</button>
+            {% csrf_token %} {{ form.as_p }}
+            <button type="submit" class="btn btn-info text-white">
+              Registrati
+            </button>
           </form>
-          
-          <p class="mt-3">Hai già un account? <a href="{% url 'login' %}">Login</a></p>
+
+          <p class="mt-3">
+            Hai già un account? <a href="{% url 'login' %}">Login</a>
+          </p>
         </div>
       </div>
     </div>

@@ -57,7 +57,26 @@ def register_view(request):
             return redirect('store')
     else:
         form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+    
+    # Aggiungi questo codice per calcolare cartItems
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        cartItems = order.get_cart_items
+    else:
+        try:
+            cart = json.loads(request.COOKIES.get('cart', '{}'))
+        except:
+            cart = {}
+        cartItems = 0
+        for i in cart:
+            try:
+                cartItems += cart[i]['quantity']
+            except:
+                pass
+    
+    # Passa cartItems al contesto
+    return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
 
 def store(request):
     if request.user.is_authenticated:
