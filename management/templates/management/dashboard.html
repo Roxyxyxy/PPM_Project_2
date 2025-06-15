@@ -1,0 +1,37 @@
+{% extends 'store/main.html' %} {% load static %} {% block content %}
+<div class="container mt-4">
+  <h2>Management Dashboard</h2>
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header">Prodotti</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ total_products }}</h5>
+          <p class="card-text">Totale prodotti nel catalogo</p>
+          <a href="{% url 'management:product_list' %}" class="btn btn-light"
+            >Gestisci</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">Ordini</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ total_orders }}</h5>
+          <p class="card-text">Totale ordini effettuati</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-white bg-warning mb-3">
+        <div class="card-header">In attesa</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ pending_orders }}</h5>
+          <p class="card-text">Ordini da evadere</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

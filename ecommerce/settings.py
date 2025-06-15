@@ -19,7 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'store.apps.StoreConfig',
+    'store.apps.StoreConfig', 
+    'management.apps.ManagementConfig',  
 ]
 
 MIDDLEWARE = [
@@ -102,3 +103,5 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/images/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+AUTH_USER_MODEL = 'store.CustomUser'
