@@ -1,16 +1,14 @@
 {% extends 'store/main.html' %} {% load static %} {% block content %}
 <div class="container mt-4">
   <h2>Gestione Prodotti</h2>
-  
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-  
-  <a href="{% url 'management:add_product' %}" class="btn btn-primary mb-3">Aggiungi Prodotto</a>
+
+  {% if messages %} {% for message in messages %}
+  <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %} {% endif %}
+
+  <a href="{% url 'management:add_product' %}" class="btn btn-primary mb-3"
+    >Aggiungi Prodotto</a
+  >
 
   <table class="table table-striped">
     <thead class="thead-dark">
@@ -39,10 +37,24 @@
         <td>€{{ product.price|floatformat:2 }}</td>
         <td>{% if product.digital %}Sì{% else %}No{% endif %}</td>
         <td>
-          <a href="{% url 'management:edit_product' product.id %}" class="btn btn-sm btn-info">Modifica</a>
-          <form action="{% url 'management:delete_product' product.id %}" method="post" class="d-inline">
+          <a
+            href="{% url 'management:edit_product' product.id %}"
+            class="btn btn-sm btn-info"
+            >Modifica</a
+          >
+          <form
+            action="{% url 'management:delete_product' product.id %}"
+            method="post"
+            class="d-inline"
+          >
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo prodotto?')">Elimina</button>
+            <button
+              type="submit"
+              class="btn btn-sm btn-danger"
+              onclick="return confirm('Sei sicuro di voler eliminare questo prodotto?')"
+            >
+              Elimina
+            </button>
           </form>
         </td>
       </tr>

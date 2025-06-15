@@ -3,6 +3,16 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from store.models import Product, Order
 import os
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+class ProductListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Product
+    template_name = 'management/product_list.html'
+    context_object_name = 'products'
+    
+    def test_func(self):
+        return self.request.user.groups.filter(name='Store Managers').exists() or self.request.user.is_superuser
 
 def is_manager(user):
     return user.groups.filter(name='Store Managers').exists() or user.is_superuser
@@ -19,13 +29,7 @@ def dashboard(request):
         'total_orders': total_orders,
         'pending_orders': pending_orders,
     }
-    return render(request, 'management/dashboard.html', context)
-
-@login_required
-@user_passes_test(is_manager)
-def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'management/product_list.html', {'products': products})
+    return render(request, 'management/dashboard.html', context)  
 
 @login_required
 @user_passes_test(is_manager)

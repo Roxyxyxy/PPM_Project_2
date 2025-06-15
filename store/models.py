@@ -1,25 +1,47 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 from django.db import models
-from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-class CustomUser(AbstractUser):
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     zipcode = models.CharField(max_length=10, blank=True, null=True)
     
     def __str__(self):
-        return self.username
+        return f'{self.user.username} Profile'
+        
+# Signal per creare automaticamente un profilo quando viene creato un utente
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
 
-# Create your models here.
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
 
 class Customer(models.Model):
-	user = models.OneToOneField(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
-	name = models.CharField(max_length=200, null=True)
-	email = models.CharField(max_length=200, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=200, null=True)
+    email = models.CharField(max_length=200, null=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)  # Aggiungi questo campo
+    
+    def __str__(self):
+        return self.name or self.user.username
+        
+    # Custom methods to extend User functionality
+    @property
+    def get_full_name(self):
+        return self.user.first_name + ' ' + self.user.last_name if self.user else self.name
+        
+    @property
+    def get_user_orders(self):
+        return self.order_set.all()
 
-	def __str__(self):
-		return self.name
+# Create your models here.
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
@@ -90,3 +112,8 @@ class ShippingAddress(models.Model):
 
 	def __str__(self):
 		return self.address
+      
+@receiver(post_save, sender=User)
+def create_customer(sender, instance, created, **kwargs):
+    if created:
+        Customer.objects.create(user=instance, name=instance.username, email=instance.email)
