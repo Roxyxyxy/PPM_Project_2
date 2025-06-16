@@ -26,22 +26,7 @@
             %}
           />
         </div>
-        <div class="form-field">
-          <input
-            required
-            class="form-control"
-            type="email"
-            name="email"
-            placeholder="Email"
-            {%
-            if
-            user.is_authenticated
-            %}value="{{ user.email }}"
-            {%
-            endif
-            %}
-          />
-        </div>
+        <!-- Rimuovi il campo email -->
       </div>
 
       <div id="shipping-info">
@@ -136,9 +121,8 @@
     var isFormValid = true;
 
     var nameField = form.querySelector('input[name="name"]');
-    var emailField = form.querySelector('input[name="email"]');
 
-    if (!nameField.value || !emailField.value) {
+    if (!nameField.value) {
       isFormValid = false;
       alert("Per favore completa tutti i campi obbligatori");
       return;
@@ -170,7 +154,6 @@
   function submitFormData() {
     var userFormData = {
       name: form.name.value,
-      email: form.email.value,
       total: total,
     };
 

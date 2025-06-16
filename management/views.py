@@ -112,11 +112,20 @@ def mark_order_complete(request, order_id):
 @user_passes_test(is_manager)
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    order_items = order.orderitem_set.all()
+    customer = order.customer
+    
+    # Recupera tutti gli altri ordini del cliente (escluso quello corrente)
+    other_orders = Order.objects.filter(
+        customer=customer, 
+        complete=True  # Aggiungi questo per mostrare solo ordini completati
+    ).exclude(id=order_id).order_by('-date_ordered')
+    
+    # Aggiungi un messaggio di debug per vedere quanti ordini vengono trovati
+    print(f"Altri ordini trovati: {other_orders.count()}")
     
     context = {
         'order': order,
-        'order_items': order_items,
-        'title': f'Order #{order.id} Details'
+        'other_orders': other_orders,
+        'customer': customer
     }
     return render(request, 'management/order_detail.html', context)

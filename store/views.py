@@ -54,22 +54,22 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             
-            email = request.POST.get('email')
-            user.email = email
-            user.save()
-            
+            # Crea Customer senza email
             Customer.objects.create(
                 user=user,
-                name=user.username,
-                email=email
+                name=user.username
             )
             
-            login(request, user)
-            return redirect('store')
+            # Login
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(request, username=username, password=raw_password)
+            if user is not None:
+                login(request, user)
+                return redirect('store')
     else:
         form = UserCreationForm()
     
-    # Aggiungi questo codice per calcolare cartItems
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
@@ -86,7 +86,6 @@ def register_view(request):
             except:
                 pass
     
-    # Passa cartItems al contesto
     return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
 
 def store(request):
@@ -246,32 +245,80 @@ def updateItem(request):
     return JsonResponse('Item was added', safe=False)
 
 def processOrder(request):
-	transaction_id = datetime.datetime.now().timestamp()
-	data = json.loads(request.body)
+    transaction_id = datetime.datetime.now().timestamp()
+    data = json.loads(request.body)
 
-	if request.user.is_authenticated:
-		customer = request.user.customer
-		order, created = Order.objects.get_or_create(customer=customer, complete=False)
-		total = float(data['form']['total'])
-		order.transaction_id = transaction_id
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        total = float(data['form']['total'])
+        order.transaction_id = transaction_id
 
-		if total == order.get_cart_total:
-			order.complete = True
-		order.save()
+        if total == float(order.get_cart_total):
+            order.complete = True
+        order.save()
 
-		if order.shipping == True:
-			ShippingAddress.objects.create(
-			customer=customer,
-			order=order,
-			address=data['shipping']['address'],
-			city=data['shipping']['city'],
-			state=data['shipping']['state'],
-			zipcode=data['shipping']['zipcode'],
-			)
-	else:
-		print('User is not logged in')
+        if order.shipping == True:
+            ShippingAddress.objects.create(
+                customer=customer,
+                order=order,
+                address=data['shipping']['address'],
+                city=data['shipping']['city'],
+                state=data['shipping']['state'],
+                zipcode=data['shipping']['zipcode'],
+            )
+    else:
+        # Per utenti non autenticati
+        print('User is not logged in')
+        
+        # Ottieni il nome dall'ordine
+        name = data['form']['name']
+        
+        # Crea un cliente guest
+        customer, created = Customer.objects.get_or_create(
+            name=name,
+            defaults={'user': None}
+        )
+        
+        # Crea un nuovo ordine
+        order = Order.objects.create(
+            customer=customer,
+            complete=True,
+            transaction_id=transaction_id
+        )
+        
+        # Processa gli elementi del carrello
+        cart = json.loads(request.COOKIES.get('cart', '{}'))
+        for item_id in cart:
+            try:
+                product = Product.objects.get(id=item_id)
+                quantity = cart[item_id]['quantity']
+                OrderItem.objects.create(
+                    product=product,
+                    order=order,
+                    quantity=quantity
+                )
+            except:
+                pass
+                
+        # Salva l'indirizzo di spedizione
+        if data['shipping']['address']:
+            ShippingAddress.objects.create(
+                customer=customer,
+                order=order,
+                address=data['shipping']['address'],
+                city=data['shipping']['city'],
+                state=data['shipping']['state'],
+                zipcode=data['shipping']['zipcode'],
+            )
 
-	return JsonResponse('Payment submitted..', safe=False)
+    response = JsonResponse('Payment submitted..', safe=False)
+    
+    # Svuota il carrello per utenti non autenticati
+    if not request.user.is_authenticated:
+        response.set_cookie('cart', '{}', max_age=86400)
+        
+    return response
 
 def logout_view(request):
     logout(request)
