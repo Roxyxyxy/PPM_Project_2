@@ -26,7 +26,6 @@
             %}
           />
         </div>
-        <!-- Rimuovi il campo email -->
       </div>
 
       <div id="shipping-info">
@@ -174,6 +173,24 @@
     console.log("Shipping Info:", shippingInfo);
     console.log("User Info:", userFormData);
 
+    // Assicuriamoci che il token CSRF sia correttamente definito
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    console.log("CSRF Token:", csrftoken);
+
     var url = "/process_order/";
     fetch(url, {
       method: "POST",
@@ -183,11 +200,20 @@
       },
       body: JSON.stringify({ form: userFormData, shipping: shippingInfo }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Errore nella risposta: ' + response.status);
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log("Success:", data);
         alert("Transaction completed");
         window.location.href = "{% url 'store' %}";
+      })
+      .catch(error => {
+        console.error('Errore durante la transazione:', error);
+        alert("Si è verificato un errore: " + error.message);
       });
   }
 </script>

@@ -22,12 +22,11 @@ def is_manager(user):
 def dashboard(request):
     total_products = Product.objects.count()
     total_orders = Order.objects.count()
-    pending_orders = Order.objects.filter(complete=False).count()
     
     context = {
         'total_products': total_products,
         'total_orders': total_orders,
-        'pending_orders': pending_orders,
+        'title': 'Dashboard'
     }
     return render(request, 'management/dashboard.html', context)  
 

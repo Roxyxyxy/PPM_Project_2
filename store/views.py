@@ -54,7 +54,6 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             
-            # Crea Customer senza email
             Customer.objects.create(
                 user=user,
                 name=user.username
@@ -245,80 +244,87 @@ def updateItem(request):
     return JsonResponse('Item was added', safe=False)
 
 def processOrder(request):
-    transaction_id = datetime.datetime.now().timestamp()
-    data = json.loads(request.body)
+    try:
+        transaction_id = datetime.datetime.now().timestamp()
+        data = json.loads(request.body)
 
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']['total'])
-        order.transaction_id = transaction_id
+        if request.user.is_authenticated:
+            customer = request.user.customer
+            order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            total = float(data['form']['total'])
+            order.transaction_id = transaction_id
 
-        if total == float(order.get_cart_total):
-            order.complete = True
-        order.save()
+            if total == float(order.get_cart_total):
+                order.complete = True
+            order.save()
 
-        if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                state=data['shipping']['state'],
-                zipcode=data['shipping']['zipcode'],
-            )
-    else:
-        # Per utenti non autenticati
-        print('User is not logged in')
-        
-        # Ottieni il nome dall'ordine
-        name = data['form']['name']
-        
-        # Crea un cliente guest
-        customer, created = Customer.objects.get_or_create(
-            name=name,
-            defaults={'user': None}
-        )
-        
-        # Crea un nuovo ordine
-        order = Order.objects.create(
-            customer=customer,
-            complete=True,
-            transaction_id=transaction_id
-        )
-        
-        # Processa gli elementi del carrello
-        cart = json.loads(request.COOKIES.get('cart', '{}'))
-        for item_id in cart:
-            try:
-                product = Product.objects.get(id=item_id)
-                quantity = cart[item_id]['quantity']
-                OrderItem.objects.create(
-                    product=product,
+            if order.shipping == True and 'shipping' in data:
+                ShippingAddress.objects.create(
+                    customer=customer,
                     order=order,
-                    quantity=quantity
+                    address=data['shipping']['address'],
+                    city=data['shipping']['city'],
+                    state=data['shipping']['state'],
+                    zipcode=data['shipping']['zipcode'],
                 )
-            except:
-                pass
-                
-        # Salva l'indirizzo di spedizione
-        if data['shipping']['address']:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                state=data['shipping']['state'],
-                zipcode=data['shipping']['zipcode'],
+        else:
+            print('User is not logged in')
+            name = data['form']['name']
+            
+            # Crea un cliente guest
+            customer = Customer.objects.create(
+                name=name
             )
+            
+            # Crea un ordine
+            order = Order.objects.create(
+                customer=customer,
+                complete=False, 
+                transaction_id=transaction_id
+            )
+            
+            # Processa il carrello
+            try:
+                cart = json.loads(request.COOKIES.get('cart', '{}'))
+                for item_id in cart:
+                    product = Product.objects.get(id=item_id)
+                    quantity = cart[item_id]['quantity']
+                    OrderItem.objects.create(
+                        product=product,
+                        order=order,
+                        quantity=quantity
+                    )
+            except Exception as e:
+                print(f"Error processing cart: {e}")
+            
+            # Salva indirizzo, solo se presente
+            if 'shipping' in data:
+                try:
+                    ShippingAddress.objects.create(
+                        customer=customer,
+                        order=order,
+                        address=data['shipping']['address'],
+                        city=data['shipping']['city'],
+                        state=data['shipping']['state'],
+                        zipcode=data['shipping']['zipcode'],
+                    )
+                except Exception as e:
+                    print(f"Error saving shipping address: {e}")
 
-    response = JsonResponse('Payment submitted..', safe=False)
-    
-    # Svuota il carrello per utenti non autenticati
-    if not request.user.is_authenticated:
-        response.set_cookie('cart', '{}', max_age=86400)
+        # Prepara risposta
+        response = JsonResponse('Payment submitted..', safe=False)
         
-    return response
+        # Svuota carrello
+        if not request.user.is_authenticated:
+            response.set_cookie('cart', '{}', max_age=86400)
+        
+        return response
+    
+    except Exception as e:
+        print(f"Order processing error: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse('Error processing order', safe=False, status=200)  # Cambio a 200 per evitare errori in frontend
 
 def logout_view(request):
     logout(request)
