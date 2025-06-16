@@ -87,3 +87,23 @@ def delete_product(request, pk):
     return render(request, 'management/product_confirm_delete.html', {
         'product': product
     })
+
+@login_required
+@user_passes_test(is_manager)
+def order_list(request):
+    orders = Order.objects.all().order_by('-date_ordered')
+    context = {
+        'orders': orders,
+        'title': 'Orders List'
+    }
+    return render(request, 'management/order_list.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def mark_order_complete(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        order.complete = True
+        order.save()
+        messages.success(request, f'Order #{order.id} has been marked as complete!')
+    return redirect('management:order_list')
