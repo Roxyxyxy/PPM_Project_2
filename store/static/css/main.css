@@ -33,7 +33,7 @@ body{
 .store-title {
   text-align: center;
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
   font-size: 32px;
   font-weight: 900;
 }
@@ -50,7 +50,11 @@ body{
 .product-image-container {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
   overflow: hidden;
 }
 
@@ -72,9 +76,10 @@ body{
 }
 
 .product-img-fixed {
-  width: 220px;
-  height: 220px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 200px;
+  width: auto;
+  object-fit: contain;
   border-radius: 8px;
 }
 

@@ -107,3 +107,16 @@ def mark_order_complete(request, order_id):
         order.save()
         messages.success(request, f'Order #{order.id} has been marked as complete!')
     return redirect('management:order_list')
+
+@login_required
+@user_passes_test(is_manager)
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order_items = order.orderitem_set.all()
+    
+    context = {
+        'order': order,
+        'order_items': order_items,
+        'title': f'Order #{order.id} Details'
+    }
+    return render(request, 'management/order_detail.html', context)

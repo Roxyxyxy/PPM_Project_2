@@ -15,6 +15,15 @@
             type="text"
             name="name"
             placeholder="Nome"
+            {%
+            if
+            user.is_authenticated
+            and
+            user.customer
+            %}value="{{ user.customer.name }}"
+            {%
+            endif
+            %}
           />
         </div>
         <div class="form-field">
@@ -24,6 +33,13 @@
             type="email"
             name="email"
             placeholder="Email"
+            {%
+            if
+            user.is_authenticated
+            %}value="{{ user.email }}"
+            {%
+            endif
+            %}
           />
         </div>
       </div>
@@ -65,8 +81,6 @@
         </div>
         <hr />
       </div>
-
-      <!-- Pulsante unico per entrambe le funzioni -->
       <button id="payment-button" class="btn btn-info text-white" type="button">
         Effettua Pagamento
       </button>
@@ -114,32 +128,23 @@
     document.getElementById("shipping-info").innerHTML = "";
   }
 
-  if (user != "AnonymousUser") {
-    document.getElementById("user-info").innerHTML = "";
-  }
-
   // Gestisce il click sul pulsante di pagamento
   paymentButton.addEventListener("click", function (e) {
     e.preventDefault();
     console.log("Payment button clicked");
 
-    // Verifica se il form è valido
     var isFormValid = true;
 
-    if (user == "AnonymousUser") {
-      // Verifica i campi obbligatori per utenti anonimi
-      var nameField = form.querySelector('input[name="name"]');
-      var emailField = form.querySelector('input[name="email"]');
+    var nameField = form.querySelector('input[name="name"]');
+    var emailField = form.querySelector('input[name="email"]');
 
-      if (!nameField.value || !emailField.value) {
-        isFormValid = false;
-        alert("Per favore completa tutti i campi obbligatori");
-        return;
-      }
+    if (!nameField.value || !emailField.value) {
+      isFormValid = false;
+      alert("Per favore completa tutti i campi obbligatori");
+      return;
     }
 
     if (shipping != "False") {
-      // Verifica campi di spedizione
       var addressField = form.querySelector('input[name="address"]');
       var cityField = form.querySelector('input[name="city"]');
       var stateField = form.querySelector('input[name="state"]');
@@ -157,7 +162,6 @@
       }
     }
 
-    // Se tutto è valido, invia l'ordine
     if (isFormValid) {
       submitFormData();
     }
@@ -165,8 +169,8 @@
 
   function submitFormData() {
     var userFormData = {
-      name: null,
-      email: null,
+      name: form.name.value,
+      email: form.email.value,
       total: total,
     };
 
@@ -182,11 +186,6 @@
       shippingInfo.city = form.city.value;
       shippingInfo.state = form.state.value;
       shippingInfo.zipcode = form.zipcode.value;
-    }
-
-    if (user == "AnonymousUser") {
-      userFormData.name = form.name.value;
-      userFormData.email = form.email.value;
     }
 
     console.log("Shipping Info:", shippingInfo);

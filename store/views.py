@@ -53,6 +53,17 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            
+            email = request.POST.get('email')
+            user.email = email
+            user.save()
+            
+            Customer.objects.create(
+                user=user,
+                name=user.username,
+                email=email
+            )
+            
             login(request, user)
             return redirect('store')
     else:
