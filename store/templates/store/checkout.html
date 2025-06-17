@@ -9,28 +9,24 @@
       <div id="user-info">
         <div class="form-field">
           <h1 class="text-info">Checkout</h1>
-          <input
-            required
-            class="form-control"
-            type="text"
-            name="name"
-            placeholder="Nome"
-            {%
-            if
-            user.is_authenticated
-            and
-            user.customer
-            %}value="{{ user.customer.name }}"
-            {%
-            endif
-            %}
-          />
+          {% if user.is_authenticated %}
+          <p>Account: <strong>{{ user.username }}</strong></p>
+          {% endif %}
         </div>
       </div>
 
       <div id="shipping-info">
         <hr />
         <p class="section-title">Indirizzo di spedizione</p>
+        <div class="form-field">
+          <input
+            required
+            class="form-control"
+            type="text"
+            name="name"
+            placeholder="Nome destinatario"
+          />
+        </div>
         <div class="form-field">
           <input
             class="form-control"
@@ -157,18 +153,12 @@
     };
 
     var shippingInfo = {
-      address: null,
-      city: null,
-      state: null,
-      zipcode: null,
+      name: form.name.value,
+      address: form.address.value,
+      city: form.city.value,
+      state: form.state.value,
+      zipcode: form.zipcode.value,
     };
-
-    if (shipping != "False") {
-      shippingInfo.address = form.address.value;
-      shippingInfo.city = form.city.value;
-      shippingInfo.state = form.state.value;
-      shippingInfo.zipcode = form.zipcode.value;
-    }
 
     console.log("Shipping Info:", shippingInfo);
     console.log("User Info:", userFormData);
@@ -176,19 +166,19 @@
     // Assicuriamoci che il token CSRF sia correttamente definito
     function getCookie(name) {
       let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-              const cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
           }
+        }
       }
       return cookieValue;
     }
-    const csrftoken = getCookie('csrftoken');
+    const csrftoken = getCookie("csrftoken");
     console.log("CSRF Token:", csrftoken);
 
     var url = "/process_order/";
@@ -202,7 +192,7 @@
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Errore nella risposta: ' + response.status);
+          throw new Error("Errore nella risposta: " + response.status);
         }
         return response.json();
       })
@@ -211,8 +201,8 @@
         alert("Transaction completed");
         window.location.href = "{% url 'store' %}";
       })
-      .catch(error => {
-        console.error('Errore durante la transazione:', error);
+      .catch((error) => {
+        console.error("Errore durante la transazione:", error);
         alert("Si è verificato un errore: " + error.message);
       });
   }

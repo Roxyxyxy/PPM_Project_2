@@ -108,7 +108,11 @@ def store(request):
         products = Product.objects.all()
     
     if request.user.is_authenticated:
-        customer = request.user.customer
+        try:
+            customer = request.user.customer
+        except:
+            customer = Customer.objects.create(user=request.user, name=request.user.username)
+        
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
@@ -157,7 +161,11 @@ def store(request):
 
 def cart(request):
     if request.user.is_authenticated:
-        customer = request.user.customer
+        try:
+            customer = request.user.customer
+        except:
+            customer = Customer.objects.create(user=request.user, name=request.user.username)
+            
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
@@ -201,7 +209,11 @@ def cart(request):
 
 def checkout(request):
     if request.user.is_authenticated:
-        customer = request.user.customer
+        try:
+            customer = request.user.customer
+        except:
+            customer = Customer.objects.create(user=request.user, name=request.user.username)
+            
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
@@ -285,6 +297,7 @@ def processOrder(request):
                 ShippingAddress.objects.create(
                     customer=customer,
                     order=order,
+                    name=data['shipping']['name'],
                     address=data['shipping']['address'],
                     city=data['shipping']['city'],
                     state=data['shipping']['state'],
@@ -326,6 +339,7 @@ def processOrder(request):
                     ShippingAddress.objects.create(
                         customer=customer,
                         order=order,
+                        name=data['shipping']['name'],
                         address=data['shipping']['address'],
                         city=data['shipping']['city'],
                         state=data['shipping']['state'],

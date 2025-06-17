@@ -25,7 +25,7 @@
       <h5 class="m-0">Informazioni Cliente</h5>
     </div>
     <div class="card-body">
-      <p><strong>Nome:</strong> {{ order.customer.name }}</p>
+      <p><strong>Account:</strong> {{ order.customer.user.username }}</p>
     </div>
   </div>
 
@@ -37,6 +37,7 @@
     </div>
     <div class="card-body">
       {% with address=order.shippingaddress_set.first %}
+      <p><strong>Nome Destinatario:</strong> {{ address.name }}</p>
       <p><strong>Indirizzo:</strong> {{ address.address }}</p>
       <p><strong>Città:</strong> {{ address.city }}</p>
       <p><strong>Provincia:</strong> {{ address.state }}</p>

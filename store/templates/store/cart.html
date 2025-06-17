@@ -45,7 +45,17 @@
 </h2>
 
 <div class="cart-buttons">
-  <a href="{% url 'checkout' %}" class="btn btn-success">Procedi al checkout</a>
+  <div class="checkout-section">
+    {% if order.get_cart_items > 0 %}
+    <a href="{% url 'checkout' %}" class="btn btn-success btn-block"
+      >Procedi al checkout</a
+    >
+    {% else %}
+    <div class="alert alert-info">
+      Aggiungi prodotti al carrello per procedere all'acquisto
+    </div>
+    {% endif %}
+  </div>
   <a href="{% url 'store' %}" class="continue-link">Continua lo shopping</a>
 </div>
 {% endblock content %}

@@ -145,7 +145,7 @@ body{
 .cart-img {
   width: 80px;
   height: 80px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
 }
 .cart-title {
@@ -260,7 +260,7 @@ body{
 .checkout-summary .cart-img {
   width: 60px;
   height: 60px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
 }
 
