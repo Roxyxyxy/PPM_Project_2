@@ -102,6 +102,7 @@ def register_view(request):
                 pass
     
     return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
+
 def store(request):
     category = request.GET.get('category')
     
