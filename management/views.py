@@ -5,6 +5,7 @@ from store.models import Product, Order
 import os
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import models
 
 class ProductListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Product
@@ -21,12 +22,14 @@ def is_manager(user):
 @user_passes_test(lambda u: u.is_superuser)
 def dashboard(request):
     total_products = Product.objects.count()
-    total_orders = Order.objects.count()
+    
+    total_orders = Order.objects.annotate(
+        items_count=models.Sum('orderitem__quantity')
+    ).filter(items_count__gt=0).count()
     
     context = {
         'total_products': total_products,
         'total_orders': total_orders,
-        'title': 'Dashboard'
     }
     return render(request, 'management/dashboard.html', context)  
 

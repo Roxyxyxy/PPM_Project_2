@@ -46,11 +46,22 @@
 
 <div class="cart-buttons">
   <div class="checkout-section">
-    {% if order.get_cart_items > 0 %}
-    <a href="{% url 'checkout' %}" class="btn btn-success btn-block"
-      >Procedi al checkout</a
-    >
+    {% if order.get_cart_items > 0 %} {% if user.is_authenticated %}
+    <a href="{% url 'checkout' %}" class="btn btn-success btn-block">
+      Procedi al checkout
+    </a>
     {% else %}
+    <div class="alert alert-info">
+      <p>
+        Per completare l'acquisto è necessario
+        <a href="{% url 'login' %}">accedere</a>.
+      </p>
+      <p>
+        Se non hai un account, puoi
+        <a href="{% url 'register' %}">registrarti</a>.
+      </p>
+    </div>
+    {% endif %} {% else %}
     <div class="alert alert-info">
       Aggiungi prodotti al carrello per procedere all'acquisto
     </div>

@@ -51,10 +51,9 @@ def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            # Salva l'utente
             user = form.save()
             
-            # Crea il customer associato 
+            # Crea il customer associato
             Customer.objects.get_or_create(
                 user=user,
                 defaults={'name': user.username}
@@ -62,44 +61,28 @@ def register_view(request):
             
             # Login automatico
             username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')  
+            password = form.cleaned_data.get('password1')
             user = authenticate(request, username=username, password=password)
             
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Benvenuto {username}!')
+                messages.success(request, f'Account creato con successo per {username}!')
                 return redirect('store')
             else:
                 messages.error(request, 'Errore durante il login automatico')
-        
-        # Se arriviamo qui, c'è stato un errore nel form
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(request, f"Errore in {field}: {error}")
     else:
         form = UserCreationForm()
     
-    # Gestione del conteggio articoli carrello
+    # Gestione conteggio carrello
+    cartItems = 0
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-            order, created = Order.objects.get_or_create(customer=customer, complete=False)
-            cartItems = order.get_cart_items
+            order = Order.objects.filter(customer=customer, complete=False).first()
+            if order:
+                cartItems = order.get_cart_items
         except:
-            customer = Customer.objects.create(user=request.user, name=request.user.username)
-            order, created = Order.objects.get_or_create(customer=customer, complete=False)
-            cartItems = 0
-    else:
-        try:
-            cart = json.loads(request.COOKIES.get('cart', '{}'))
-        except:
-            cart = {}
-        cartItems = 0
-        for i in cart:
-            try:
-                cartItems += cart[i]['quantity']
-            except:
-                pass
+            pass
     
     return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
 
@@ -222,43 +205,61 @@ def checkout(request):
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
     else:
-        try:
-            cart = json.loads(request.COOKIES.get('cart', '{}'))
-        except:
-            cart = {}
-        items = []
-        order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
-        cartItems = 0
-        
-        for i in cart:
-            try:
-                cartItems += cart[i]['quantity']
-                product = Product.objects.get(id=i)
-                total = (product.price * cart[i]['quantity'])
-                
-                order['get_cart_total'] += total
-                order['get_cart_items'] += cart[i]['quantity']
-                
-                item = {
-                    'product': {
-                        'id': product.id,
-                        'name': product.name,
-                        'price': product.price,
-                        'imageURL': product.imageURL,
-                    },
-                    'quantity': cart[i]['quantity'],
-                    'get_total': total,
-                }
-                items.append(item)
-                
-                if product.digital == False:
-                    order['shipping'] = True
-            except:
-                pass
+        messages.warning(request, "Devi accedere per completare l'acquisto.")
+        return redirect('login')
 
     context = {'items': items, 'order': order, 'cartItems': cartItems}
     return render(request, 'store/checkout.html', context)
 
+def processOrder(request):
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'È necessario effettuare il login per completare l\'ordine'}, status=403)
+
+        transaction_id = datetime.datetime.now().timestamp()
+        data = json.loads(request.body)
+
+        try:
+            customer = request.user.customer
+        except:
+            customer = Customer.objects.create(user=request.user, name=request.user.username)
+
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+
+        if order.get_cart_items <= 0:
+            return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
+
+        total_from_form = float(data['form'].get('total', 0))
+        cart_total = float(order.get_cart_total)
+        order.transaction_id = transaction_id
+
+        if total_from_form != cart_total:
+            return JsonResponse({'error': 'Il totale non corrisponde'}, status=400)
+
+        order.save()
+
+        try:
+            ShippingAddress.objects.create(
+                customer=customer,
+                order=order,
+                name=data['shipping']['name'],
+                address=data['shipping']['address'],
+                city=data['shipping']['city'],
+                state=data['shipping']['state'],
+                zipcode=data['shipping']['zipcode'],
+            )
+        except Exception as e:
+            print(f"Errore durante il salvataggio dell'indirizzo di spedizione: {e}")
+            return JsonResponse({'error': 'Errore nel salvataggio dell\'indirizzo di spedizione'}, status=400)
+
+        return JsonResponse('Pagamento inviato con successo', safe=False)
+
+    except Exception as e:
+        print(f"Errore durante l'elaborazione dell'ordine: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': 'Errore durante l\'elaborazione dell\'ordine'}, status=400)
+    
 def updateItem(request):
     data = json.loads(request.body)
     productId = data['productId']
@@ -281,96 +282,6 @@ def updateItem(request):
         orderItem.delete()
 
     return JsonResponse('Item was added', safe=False)
-
-def processOrder(request):
-    try:
-        transaction_id = datetime.datetime.now().timestamp()
-        data = json.loads(request.body)
-
-        if request.user.is_authenticated:
-            customer = request.user.customer
-            order, created = Order.objects.get_or_create(customer=customer, complete=False)
-            
-            # Verifica che l'ordine abbia almeno un articolo
-            if order.get_cart_items <= 0:
-                return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
-                
-            total = float(data['form']['total'])
-            order.transaction_id = transaction_id
-
-            if total == float(order.get_cart_total):
-                order.complete = True
-            order.save()
-
-            if order.shipping == True and 'shipping' in data:
-                ShippingAddress.objects.create(
-                    customer=customer,
-                    order=order,
-                    name=data['shipping']['name'],
-                    address=data['shipping']['address'],
-                    city=data['shipping']['city'],
-                    state=data['shipping']['state'],
-                    zipcode=data['shipping']['zipcode'],
-                )
-        else:
-            print('User is not logged in')
-            name = data['form']['name']
-            
-            # Crea un cliente guest
-            customer = Customer.objects.create(
-                name=name
-            )
-            
-            # Crea un ordine
-            order = Order.objects.create(
-                customer=customer,
-                complete=False, 
-                transaction_id=transaction_id
-            )
-            
-            # Processa il carrello
-            try:
-                cart = json.loads(request.COOKIES.get('cart', '{}'))
-                for item_id in cart:
-                    product = Product.objects.get(id=item_id)
-                    quantity = cart[item_id]['quantity']
-                    OrderItem.objects.create(
-                        product=product,
-                        order=order,
-                        quantity=quantity
-                    )
-            except Exception as e:
-                print(f"Error processing cart: {e}")
-            
-            # Salva indirizzo, solo se presente
-            if 'shipping' in data:
-                try:
-                    ShippingAddress.objects.create(
-                        customer=customer,
-                        order=order,
-                        name=data['shipping']['name'],
-                        address=data['shipping']['address'],
-                        city=data['shipping']['city'],
-                        state=data['shipping']['state'],
-                        zipcode=data['shipping']['zipcode'],
-                    )
-                except Exception as e:
-                    print(f"Error saving shipping address: {e}")
-
-        # Prepara risposta
-        response = JsonResponse('Payment submitted..', safe=False)
-        
-        # Svuota carrello
-        if not request.user.is_authenticated:
-            response.set_cookie('cart', '{}', max_age=86400)
-        
-        return response
-    
-    except Exception as e:
-        print(f"Order processing error: {e}")
-        import traceback
-        traceback.print_exc()
-        return JsonResponse('Error processing order', safe=False, status=200)  # Cambio a 200 per evitare errori in frontend
 
 def logout_view(request):
     logout(request)
