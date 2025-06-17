@@ -30,22 +30,24 @@
   </div>
 
   <!-- Shipping Information -->
-  {% if order.shippingaddress_set.exists %}
   <div class="card mb-4">
     <div class="card-header bg-info text-white">
       <h5 class="m-0">Indirizzo di Spedizione</h5>
     </div>
     <div class="card-body">
-      {% with address=order.shippingaddress_set.first %}
-      <p><strong>Nome Destinatario:</strong> {{ address.name }}</p>
-      <p><strong>Indirizzo:</strong> {{ address.address }}</p>
-      <p><strong>Città:</strong> {{ address.city }}</p>
-      <p><strong>Provincia:</strong> {{ address.state }}</p>
-      <p><strong>CAP:</strong> {{ address.zipcode }}</p>
-      {% endwith %}
+      {% if order.shippingaddress_set.exists %}
+        {% with address=order.shippingaddress_set.first %}
+          <p><strong>Nome Destinatario:</strong> {{ address.name }}</p>
+          <p><strong>Indirizzo:</strong> {{ address.address }}</p>
+          <p><strong>Città:</strong> {{ address.city }}</p>
+          <p><strong>Provincia:</strong> {{ address.state }}</p>
+          <p><strong>CAP:</strong> {{ address.zipcode }}</p>
+        {% endwith %}
+      {% else %}
+        <p>Nessun indirizzo di spedizione per questo ordine.</p>
+      {% endif %}
     </div>
   </div>
-  {% endif %}
 
   <!-- All Orders - Current and Others -->
   <h3 class="mb-3">Tutti gli ordini del cliente</h3>

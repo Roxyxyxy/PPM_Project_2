@@ -1,12 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import * 
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 import json
 import datetime
+from .models import *
 
 # Login view
 def login_view(request):
@@ -55,20 +54,19 @@ def register_view(request):
             # Salva l'utente
             user = form.save()
             
-            # Crea il customer associato
+            # Crea il customer associato 
             Customer.objects.get_or_create(
                 user=user,
                 defaults={'name': user.username}
             )
             
-            # Login automatico - modo più affidabile
+            # Login automatico
             username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
+            password = form.cleaned_data.get('password1')  
             user = authenticate(request, username=username, password=password)
             
             if user is not None:
                 login(request, user)
-                # Aggiungi un messaggio per debug
                 messages.success(request, f'Benvenuto {username}!')
                 return redirect('store')
             else:
@@ -81,10 +79,16 @@ def register_view(request):
     else:
         form = UserCreationForm()
     
+    # Gestione del conteggio articoli carrello
     if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        cartItems = order.get_cart_items
+        try:
+            customer = request.user.customer
+            order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            cartItems = order.get_cart_items
+        except:
+            customer = Customer.objects.create(user=request.user, name=request.user.username)
+            order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            cartItems = 0
     else:
         try:
             cart = json.loads(request.COOKIES.get('cart', '{}'))
@@ -98,7 +102,6 @@ def register_view(request):
                 pass
     
     return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
-
 def store(request):
     category = request.GET.get('category')
     
@@ -286,6 +289,11 @@ def processOrder(request):
         if request.user.is_authenticated:
             customer = request.user.customer
             order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            
+            # Verifica che l'ordine abbia almeno un articolo
+            if order.get_cart_items <= 0:
+                return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
+                
             total = float(data['form']['total'])
             order.transaction_id = transaction_id
 
