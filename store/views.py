@@ -52,20 +52,32 @@ def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
+            # Salva l'utente
             user = form.save()
             
-            Customer.objects.create(
+            # Crea il customer associato
+            Customer.objects.get_or_create(
                 user=user,
-                name=user.username
+                defaults={'name': user.username}
             )
             
-            # Login
+            # Login automatico - modo più affidabile
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(request, username=username, password=raw_password)
+            password = form.cleaned_data.get('password1')
+            user = authenticate(request, username=username, password=password)
+            
             if user is not None:
                 login(request, user)
+                # Aggiungi un messaggio per debug
+                messages.success(request, f'Benvenuto {username}!')
                 return redirect('store')
+            else:
+                messages.error(request, 'Errore durante il login automatico')
+        
+        # Se arriviamo qui, c'è stato un errore nel form
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, f"Errore in {field}: {error}")
     else:
         form = UserCreationForm()
     
