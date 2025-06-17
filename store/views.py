@@ -100,6 +100,13 @@ def register_view(request):
     return render(request, 'registration/register.html', {'form': form, 'cartItems': cartItems})
 
 def store(request):
+    category = request.GET.get('category')
+    
+    if category:
+        products = Product.objects.filter(category=category)
+    else:
+        products = Product.objects.all()
+    
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
@@ -140,8 +147,12 @@ def store(request):
             except:
                 pass
 
-    products = Product.objects.all()
-    context = {'products': products, 'cartItems': cartItems}
+    context = {
+        'products': products,
+        'cartItems': cartItems,
+        'category': category
+    }
+    
     return render(request, 'store/store.html', context)
 
 def cart(request):

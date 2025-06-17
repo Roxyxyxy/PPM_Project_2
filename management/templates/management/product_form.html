@@ -38,6 +38,15 @@
       {% endif %}
       <input type="file" class="form-control" id="image" name="image" />
     </div>
+    <div class="form-group mb-3">
+      <label for="category">Categoria</label>
+      <select class="form-control" id="category" name="category">
+        <option value="" {% if not product.category %}selected{% endif %}>Seleziona una categoria</option>
+        <option value="Cartoni Animati" {% if product.category == "Cartoni Animati" %}selected{% endif %}>Cartoni Animati</option>
+        <option value="Animali" {% if product.category == "Animali" %}selected{% endif %}>Animali</option>
+        <option value="Cibo" {% if product.category == "Cibo" %}selected{% endif %}>Cibo</option>
+      </select>
+    </div>
     <button type="submit" class="btn btn-primary">Salva</button>
     <a href="{% url 'management:product_list' %}" class="btn btn-secondary"
       >Annulla</a

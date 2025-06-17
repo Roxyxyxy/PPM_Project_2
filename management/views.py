@@ -36,18 +36,23 @@ def add_product(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         price = request.POST.get('price')
-        digital = 'digital' in request.POST
+        category = request.POST.get('category', '')  # Aggiungi questa riga
         image = request.FILES.get('image')
         
-        product = Product(name=name, price=price, digital=digital)
-        if image:
-            product.image = image
-        product.save()
+        product = Product.objects.create(
+            name=name,
+            price=price,
+            category=category,  # Aggiungi questa riga
+            image=image
+        )
         
         messages.success(request, 'Prodotto aggiunto con successo!')
         return redirect('management:product_list')
-    
-    return render(request, 'management/product_form.html', {'title': 'Aggiungi Prodotto'})
+        
+    context = {
+        'title': 'Aggiungi Prodotto'
+    }
+    return render(request, 'management/product_form.html', context)
 
 @login_required
 @user_passes_test(is_manager)
@@ -57,21 +62,19 @@ def edit_product(request, pk):
     if request.method == 'POST':
         product.name = request.POST.get('name')
         product.price = request.POST.get('price')
-        product.digital = 'digital' in request.POST
-        
-        image = request.FILES.get('image')
-        if image:
-            # Puoi aggiungere qui la logica per eliminare l'immagine esistente
-            product.image = image
+        product.category = request.POST.get('category', '')  # Aggiungi questa riga
+        if 'image' in request.FILES:
+            product.image = request.FILES['image']
         
         product.save()
         messages.success(request, 'Prodotto modificato con successo!')
         return redirect('management:product_list')
-    
-    return render(request, 'management/product_form.html', {
+        
+    context = {
         'title': 'Modifica Prodotto',
         'product': product
-    })
+    }
+    return render(request, 'management/product_form.html', context)
 
 @login_required
 @user_passes_test(is_manager)

@@ -28,6 +28,7 @@
         <th>Immagine</th>
         <th>Nome</th>
         <th>Prezzo</th>
+        <th>Categoria</th>
       </tr>
     </thead>
     <tbody>
@@ -44,6 +45,7 @@
         </td>
         <td>{{ product.name }}</td>
         <td>€{{ product.price|floatformat:2 }}</td>
+        <td>{{ product.category }}</td>
         <td>
           <a
             href="{% url 'management:edit_product' product.id %}"
