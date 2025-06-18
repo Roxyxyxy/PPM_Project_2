@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 import json
 import datetime
+import traceback
 from .models import *
 
 # Login view
@@ -28,7 +29,7 @@ def login_view(request):
     # Calcola cartItems come nelle altre viste
     if request.user.is_authenticated:
         customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         cartItems = order.get_cart_items
     else:
         try:
@@ -78,7 +79,7 @@ def register_view(request):
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-            order = Order.objects.filter(customer=customer, complete=False).first()
+            order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
             if order:
                 cartItems = order.get_cart_items
         except:
@@ -97,10 +98,10 @@ def store(request):
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-        except:
+        except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
         
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
     else:
@@ -150,10 +151,10 @@ def cart(request):
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-        except:
+        except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
             
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
     else:
@@ -198,10 +199,10 @@ def checkout(request):
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-        except:
+        except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
             
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         items = order.orderitem_set.all()
         cartItems = order.get_cart_items
     else:
@@ -220,10 +221,10 @@ def processOrder(request):
         
         try:
             customer = request.user.customer
-        except:
+        except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
 
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         
         if order.get_cart_items <= 0:
             return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
@@ -234,33 +235,30 @@ def processOrder(request):
         if total_from_form != cart_total:
             return JsonResponse({'error': 'Il totale non corrisponde'}, status=400)
 
-        # Marca l'ordine come completato
-        order.complete = True
+        # L'ordine viene finalizzato con un ID transazione ma resta 'complete=False'.
+        # Sarà l'admin a marcarlo come completato.
         order.transaction_id = datetime.datetime.now().timestamp()
         order.save()
 
         try:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                name=data['shipping']['name'],
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                state=data['shipping']['state'],
-                zipcode=data['shipping']['zipcode'],
-            )
+            if order.shipping:
+                ShippingAddress.objects.create(
+                    customer=customer,
+                    order=order,
+                    name=data['shipping']['name'],
+                    address=data['shipping']['address'],
+                    city=data['shipping']['city'],
+                    state=data['shipping']['state'],
+                    zipcode=data['shipping']['zipcode'],
+                )
         except Exception as e:
             print(f"Errore durante il salvataggio dell'indirizzo di spedizione: {e}")
             return JsonResponse({'error': 'Errore nel salvataggio dell\'indirizzo di spedizione'}, status=400)
-
-        # Crea un nuovo ordine vuoto che diventerà il nuovo carrello dell'utente
-        Order.objects.create(customer=customer, complete=False)
         
         return JsonResponse('Pagamento inviato con successo', safe=False)
 
     except Exception as e:
         print(f"Errore durante l'elaborazione dell'ordine: {e}")
-        import traceback
         traceback.print_exc()
         return JsonResponse({'error': 'Errore durante l\'elaborazione dell\'ordine'}, status=400)
     
@@ -271,7 +269,7 @@ def updateItem(request):
     
     customer = request.user.customer
     product = Product.objects.get(id=productId)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
     
     orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
 
@@ -302,21 +300,22 @@ def my_orders(request):
         
     try:
         customer = request.user.customer
-    except:
+    except Customer.DoesNotExist:
         customer = Customer.objects.create(user=request.user, name=request.user.username)
         
-    # Recupera tutti gli ordini completati di questo utente
-    orders = Order.objects.filter(customer=customer, complete=True).order_by('-date_ordered')
+    # Recupera tutti gli ordini inviati (sia completati che in attesa)
+    orders = Order.objects.filter(customer=customer, transaction_id__isnull=False).order_by('-date_ordered')
     
-    # Calcolo cartItems come nelle altre viste
+    # Calcolo cartItems per il carrello corrente (senza transaction_id)
     try:
-        current_order = Order.objects.filter(customer=customer, complete=False).first()
+        current_order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
         cartItems = current_order.get_cart_items if current_order else 0
     except:
         cartItems = 0
     
     context = {
         'orders': orders,
-        'cartItems': cartItems
+        'cartItems': cartItems,
+        'just_completed': 'refresh' in request.GET
     }
     return render(request, 'store/my_orders.html', context)

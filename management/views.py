@@ -23,9 +23,8 @@ def is_manager(user):
 def dashboard(request):
     total_products = Product.objects.count()
     
-    total_orders = Order.objects.annotate(
-        items_count=models.Sum('orderitem__quantity')
-    ).filter(items_count__gt=0).count()
+    # Conta solo gli ordini che sono stati effettivamente piazzati
+    total_orders = Order.objects.filter(transaction_id__isnull=False).count()
     
     context = {
         'total_products': total_products,
@@ -96,7 +95,8 @@ def delete_product(request, pk):
 @login_required
 @user_passes_test(is_manager)
 def order_list(request):
-    orders = Order.objects.all().order_by('-date_ordered')
+    # Mostra solo gli ordini che sono stati piazzati (hanno un transaction_id)
+    orders = Order.objects.filter(transaction_id__isnull=False).order_by('-date_ordered')
     context = {
         'orders': orders,
         'title': 'Orders List'
@@ -119,10 +119,10 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     customer = order.customer
     
-    # Recupera tutti gli altri ordini del cliente (escluso quello corrente)
+    # Recupera tutti gli altri ordini piazzati del cliente (escluso quello corrente)
     other_orders = Order.objects.filter(
         customer=customer, 
-        complete=True  # Aggiungi questo per mostrare solo ordini completati
+        transaction_id__isnull=False
     ).exclude(id=order_id).order_by('-date_ordered')
     
     # Aggiungi un messaggio di debug per vedere quanti ordini vengono trovati
