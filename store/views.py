@@ -216,26 +216,27 @@ def processOrder(request):
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'È necessario effettuare il login per completare l\'ordine'}, status=403)
 
-        transaction_id = datetime.datetime.now().timestamp()
         data = json.loads(request.body)
-
+        
         try:
             customer = request.user.customer
         except:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
 
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
-
+        
         if order.get_cart_items <= 0:
             return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
 
         total_from_form = float(data['form'].get('total', 0))
         cart_total = float(order.get_cart_total)
-        order.transaction_id = transaction_id
 
         if total_from_form != cart_total:
             return JsonResponse({'error': 'Il totale non corrisponde'}, status=400)
 
+        # Marca l'ordine come completato
+        order.complete = True
+        order.transaction_id = datetime.datetime.now().timestamp()
         order.save()
 
         try:
@@ -252,6 +253,9 @@ def processOrder(request):
             print(f"Errore durante il salvataggio dell'indirizzo di spedizione: {e}")
             return JsonResponse({'error': 'Errore nel salvataggio dell\'indirizzo di spedizione'}, status=400)
 
+        # Crea un nuovo ordine vuoto che diventerà il nuovo carrello dell'utente
+        Order.objects.create(customer=customer, complete=False)
+        
         return JsonResponse('Pagamento inviato con successo', safe=False)
 
     except Exception as e:
@@ -290,3 +294,29 @@ def logout_view(request):
     if 'cart' in request.COOKIES:
         response.delete_cookie('cart')
     return response
+
+def my_orders(request):
+    if not request.user.is_authenticated:
+        messages.warning(request, "Devi accedere per visualizzare i tuoi ordini.")
+        return redirect('login')
+        
+    try:
+        customer = request.user.customer
+    except:
+        customer = Customer.objects.create(user=request.user, name=request.user.username)
+        
+    # Recupera tutti gli ordini completati di questo utente
+    orders = Order.objects.filter(customer=customer, complete=True).order_by('-date_ordered')
+    
+    # Calcolo cartItems come nelle altre viste
+    try:
+        current_order = Order.objects.filter(customer=customer, complete=False).first()
+        cartItems = current_order.get_cart_items if current_order else 0
+    except:
+        cartItems = 0
+    
+    context = {
+        'orders': orders,
+        'cartItems': cartItems
+    }
+    return render(request, 'store/my_orders.html', context)

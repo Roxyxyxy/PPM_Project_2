@@ -204,8 +204,19 @@
       })
       .then((data) => {
         console.log("Success:", data);
+
+        var cart = {};
+        document.cookie =
+          "cart=" +
+          JSON.stringify(cart) +
+          ";domain=;path=/;max-age=" +
+          60 * 60 * 24 * 30;
+
+        localStorage.removeItem("cart");
+
         alert("Transaction completed");
-        window.location.href = "{% url 'store' %}";
+        window.location.href =
+          "{% url 'my_orders' %}?refresh=" + new Date().getTime();
       })
       .catch((error) => {
         console.error("Errore durante la transazione:", error);
