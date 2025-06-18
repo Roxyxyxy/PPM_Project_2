@@ -11,6 +11,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ppmproject2-production.up.railway.app', '.up.railway.app']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://ppmproject2-production.up.railway.app',
+    'http://ppmproject2-production.up.railway.app',
+    'https://*.up.railway.app',
+    'http://*.up.railway.app',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
