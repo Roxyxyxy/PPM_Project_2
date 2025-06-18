@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.db.models import Count
 import json
 import datetime
 import traceback
@@ -26,11 +27,13 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     
-    # Calcola cartItems come nelle altre viste
     if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        cartItems = order.get_cart_items
+        try:
+            customer = request.user.customer
+            order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+            cartItems = order.get_cart_items if order else 0
+        except:
+            cartItems = 0
     else:
         try:
             cart = json.loads(request.COOKIES.get('cart', '{}'))
@@ -53,18 +56,13 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            
-            # Crea il customer associato
             Customer.objects.get_or_create(
                 user=user,
                 defaults={'name': user.username}
             )
-            
-            # Login automatico
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
             user = authenticate(request, username=username, password=password)
-            
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Account creato con successo per {username}!')
@@ -74,14 +72,12 @@ def register_view(request):
     else:
         form = UserCreationForm()
     
-    # Gestione conteggio carrello
     cartItems = 0
     if request.user.is_authenticated:
         try:
             customer = request.user.customer
-            order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-            if order:
-                cartItems = order.get_cart_items
+            order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+            cartItems = order.get_cart_items if order else 0
         except:
             pass
     
@@ -89,7 +85,6 @@ def register_view(request):
 
 def store(request):
     category = request.GET.get('category')
-    
     if category:
         products = Product.objects.filter(category=category)
     else:
@@ -100,10 +95,9 @@ def store(request):
             customer = request.user.customer
         except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
-        
-        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
+        order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+        items = order.orderitem_set.all() if order else []
+        cartItems = order.get_cart_items if order else 0
     else:
         try:
             cart = json.loads(request.COOKIES.get('cart', '{}'))
@@ -112,16 +106,13 @@ def store(request):
         items = []
         order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
         cartItems = 0
-        
         for i in cart:
             try:
                 cartItems += cart[i]['quantity']
                 product = Product.objects.get(id=i)
                 total = (product.price * cart[i]['quantity'])
-                
                 order['get_cart_total'] += total
                 order['get_cart_items'] += cart[i]['quantity']
-                
                 item = {
                     'product': {
                         'id': product.id,
@@ -133,8 +124,7 @@ def store(request):
                     'get_total': total,
                 }
                 items.append(item)
-                
-                if product.digital == False:
+                if not product.digital:
                     order['shipping'] = True
             except:
                 pass
@@ -144,7 +134,6 @@ def store(request):
         'cartItems': cartItems,
         'category': category
     }
-    
     return render(request, 'store/store.html', context)
 
 def cart(request):
@@ -153,10 +142,9 @@ def cart(request):
             customer = request.user.customer
         except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
-            
-        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
+        order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+        items = order.orderitem_set.all() if order else []
+        cartItems = order.get_cart_items if order else 0
     else:
         try:
             cart = json.loads(request.COOKIES.get('cart', '{}'))
@@ -165,16 +153,13 @@ def cart(request):
         items = []
         order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
         cartItems = 0
-        
         for i in cart:
             try:
                 cartItems += cart[i]['quantity']
                 product = Product.objects.get(id=i)
                 total = (product.price * cart[i]['quantity'])
-                
                 order['get_cart_total'] += total
                 order['get_cart_items'] += cart[i]['quantity']
-                
                 item = {
                     'product': {
                         'id': product.id,
@@ -186,8 +171,7 @@ def cart(request):
                     'get_total': total,
                 }
                 items.append(item)
-                
-                if product.digital == False:
+                if not product.digital:
                     order['shipping'] = True
             except:
                 pass
@@ -201,10 +185,9 @@ def checkout(request):
             customer = request.user.customer
         except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
-            
-        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
+        order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+        items = order.orderitem_set.all() if order else []
+        cartItems = order.get_cart_items if order else 0
     else:
         messages.warning(request, "Devi accedere per completare l'acquisto.")
         return redirect('login')
@@ -218,15 +201,13 @@ def processOrder(request):
             return JsonResponse({'error': 'È necessario effettuare il login per completare l\'ordine'}, status=403)
 
         data = json.loads(request.body)
-        
         try:
             customer = request.user.customer
         except Customer.DoesNotExist:
             customer = Customer.objects.create(user=request.user, name=request.user.username)
 
-        order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        
-        if order.get_cart_items <= 0:
+        order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+        if not order or order.get_cart_items <= 0:
             return JsonResponse({'error': 'Il carrello è vuoto'}, status=400)
 
         total_from_form = float(data['form'].get('total', 0))
@@ -269,8 +250,8 @@ def updateItem(request):
     
     customer = request.user.customer
     product = Product.objects.get(id=productId)
+    # Qui è corretto creare l'ordine se non esiste
     order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-    
     orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
 
     if action == 'add':
@@ -303,13 +284,19 @@ def my_orders(request):
     except Customer.DoesNotExist:
         customer = Customer.objects.create(user=request.user, name=request.user.username)
         
-    # Recupera tutti gli ordini inviati (sia completati che in attesa)
-    orders = Order.objects.filter(customer=customer, transaction_id__isnull=False).order_by('-date_ordered')
+    # Recupera tutti gli ordini inviati (sia completati che in attesa) con almeno un articolo
+    orders = Order.objects.annotate(
+        item_count=Count('orderitem')
+    ).filter(
+        customer=customer,
+        transaction_id__isnull=False,
+        item_count__gt=0
+    ).order_by('-date_ordered')
     
     # Calcolo cartItems per il carrello corrente (senza transaction_id)
     try:
-        current_order, created = Order.objects.get_or_create(customer=customer, complete=False, transaction_id=None)
-        cartItems = current_order.get_cart_items if current_order else 0
+        order = Order.objects.filter(customer=customer, complete=False, transaction_id=None).first()
+        cartItems = order.get_cart_items if order else 0
     except:
         cartItems = 0
     

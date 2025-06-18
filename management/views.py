@@ -6,6 +6,7 @@ import os
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import models
+from django.db.models import Count
 
 class ProductListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Product
@@ -22,10 +23,12 @@ def is_manager(user):
 @user_passes_test(lambda u: u.is_superuser)
 def dashboard(request):
     total_products = Product.objects.count()
-    
-    # Conta solo gli ordini che sono stati effettivamente piazzati
-    total_orders = Order.objects.filter(transaction_id__isnull=False).count()
-    
+    total_orders = Order.objects.annotate(
+        item_count=Count('orderitem')
+    ).filter(
+        transaction_id__isnull=False,
+        item_count__gt=0
+    ).count()
     context = {
         'total_products': total_products,
         'total_orders': total_orders,
@@ -38,13 +41,13 @@ def add_product(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         price = request.POST.get('price')
-        category = request.POST.get('category', '')  # Aggiungi questa riga
+        category = request.POST.get('category', '')  
         image = request.FILES.get('image')
         
         product = Product.objects.create(
             name=name,
             price=price,
-            category=category,  # Aggiungi questa riga
+            category=category,  
             image=image
         )
         
@@ -64,7 +67,7 @@ def edit_product(request, pk):
     if request.method == 'POST':
         product.name = request.POST.get('name')
         product.price = request.POST.get('price')
-        product.category = request.POST.get('category', '')  # Aggiungi questa riga
+        product.category = request.POST.get('category', '')  
         if 'image' in request.FILES:
             product.image = request.FILES['image']
         
@@ -95,8 +98,12 @@ def delete_product(request, pk):
 @login_required
 @user_passes_test(is_manager)
 def order_list(request):
-    # Mostra solo gli ordini che sono stati piazzati (hanno un transaction_id)
-    orders = Order.objects.filter(transaction_id__isnull=False).order_by('-date_ordered')
+    orders = Order.objects.annotate(
+        item_count=Count('orderitem')
+    ).filter(
+        transaction_id__isnull=False,
+        item_count__gt=0
+    ).order_by('-date_ordered')
     context = {
         'orders': orders,
         'title': 'Orders List'
@@ -118,15 +125,13 @@ def mark_order_complete(request, order_id):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     customer = order.customer
-    
-    # Recupera tutti gli altri ordini piazzati del cliente (escluso quello corrente)
-    other_orders = Order.objects.filter(
-        customer=customer, 
-        transaction_id__isnull=False
+    other_orders = Order.objects.annotate(
+        item_count=Count('orderitem')
+    ).filter(
+        customer=customer,
+        transaction_id__isnull=False,
+        item_count__gt=0
     ).exclude(id=order_id).order_by('-date_ordered')
-    
-    # Aggiungi un messaggio di debug per vedere quanti ordini vengono trovati
-    print(f"Altri ordini trovati: {other_orders.count()}")
     
     context = {
         'order': order,
