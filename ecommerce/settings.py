@@ -83,9 +83,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Internationalization
+# https://docs.djangoproject.com/en/3.0/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Rome'
 
 USE_I18N = True
 
@@ -105,4 +108,4 @@ MEDIA_URL = '/images/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 
 LOGIN_REDIRECT_URL = 'store'  
-LOGOUT_REDIRECT_URL = 'store'  
+LOGOUT_REDIRECT_URL = 'store'
